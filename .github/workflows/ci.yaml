@@ -7,10 +7,10 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: ubuntu-latest
+    runs-on: labs-runner
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4  # Checkout del repositorio
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -24,7 +24,7 @@ jobs:
         run: npm run build
 
       - name: Run reusable workflow - Build Setup
-        uses: ./.github/workflows/reusable-build.yaml
+        uses: ./.github/workflows/reusable-build.yaml  # Asegúrate de que la ruta esté correcta
 
       - name: Get Docker image tag
         id: get_tag
@@ -44,7 +44,7 @@ jobs:
 
   test-coverage:
     needs: build-and-push
-    runs-on: ubuntu-latest
+    runs-on: labs-runner
     env:
       ENVIRONMENT: ${{ secrets.ENVIRONMENT }}  # Pasa el secreto como variable de entorno
     steps:
