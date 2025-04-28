@@ -1,20 +1,21 @@
-name: Continuous Deployment
+name: CD - Deploy Docker Image
 
 on:
-  workflow_dispatch:  # Para lanzarlo manualmente
+  workflow_dispatch:
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
       - name: Pull Docker image
-        run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/ghactions-weekly-exercise:latest
-
-      - name: Run container
         run: |
-          docker run -d -p 80:80 --name my-angular-app ${{ secrets.DOCKERHUB_USERNAME }}/ghactions-weekly-exercise:latest
-          sleep 10
+          VERSION=$(node -p "require('./package.json').version")
+          docker pull ${{ secrets.DOCKER_USERNAME }}/mi-app-angular:$VERSION
 
-      - name: Check with curl
-        run: curl -f http://localhost || (echo "Service not responding!" && exit 1)
+      - name: Deploy to Nginx
+        run: |
+          docker run -d -p 80:80 ${{ secrets.DOCKER_USERNAME }}/mi-app-angular:$VERSION
+          curl -f http://localhost:80 || exit 1
