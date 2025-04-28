@@ -21,17 +21,6 @@ El propósito principal de este ejercicio es _proporcionarte una introducción p
 - Trabajo con **workflows reutilizables**.
 - Manejo de **Secrets**
 
-## Extra - Uso de Entornos y Aprobadores para Despliegues
-
-Como valor añadido ("extra mile"), implementar entornos (environments) y aprobadores (required reviewers) en GitHub Actions aporta un nivel extra de control y seguridad en los despliegues.
-
-Para que tenga sentido practico deberemos crear secretos por entornos y solo hacer uso de estos cuando corresponda.
-
-Les daremos sentido al uso de ramas:
-
-- **Rama `main`**: Será usada para los despliegues en el entorno de **producción**.
-- **Rama `development`**: Se utilizará para los despliegues e integraciones continuas en el entorno de **UAT** (User Acceptance Testing).
-
 ## Estructura del Repositorio
 
 Este repositorio contiene una aplicación de Angular. Deberás diseñar dos workflows clave:
