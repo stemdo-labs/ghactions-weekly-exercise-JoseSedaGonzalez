@@ -45,7 +45,9 @@ jobs:
   test-coverage:
     needs: build-and-push
     runs-on: labs-runner
+    env:
+      ENVIRONMENT: ${{ secrets.ENVIRONMENT }}  # Pasa el secreto como variable de entorno
     steps:
       - name: Check if environment is production
-        if: ${{ secrets.ENVIRONMENT == 'production' }}  # SOLO en producción
+        if: ${{ env.ENVIRONMENT == 'production' }}  # Evaluar si el entorno es 'production'
         run: echo "Running production-only tests...." && sleep 10
