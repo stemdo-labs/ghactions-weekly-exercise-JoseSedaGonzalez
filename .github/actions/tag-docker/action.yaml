@@ -1,0 +1,28 @@
+name: Tag Docker Image
+description: Read version from package.json and tag docker image
+inputs:
+  image_name:
+    description: 'Name of the docker image'
+    required: true
+outputs:
+  tagged_image:
+    description: 'The full image name with version'
+    value: ${{ steps.set-tag.outputs.tagged_image }}
+runs:
+  using: "composite"
+  steps:
+    - name: Read version
+      id: read_version
+      run: |
+        VERSION=$(cat package.json | jq -r '.version')
+        echo "Version detected: $VERSION"
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Set tag
+      id: set-tag
+      run: |
+        TAGGED_IMAGE="${{ inputs.image_name }}:$VERSION"
+        echo "Tagged image: $TAGGED_IMAGE"
+        echo "tagged_image=$TAGGED_IMAGE" >> $GITHUB_OUTPUT
+      shell: bash

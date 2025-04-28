@@ -75,5 +75,3 @@ El campo "version" del archivo package.json es el que se usará para etiquetar l
 ## Contribución
 
 ¡Tus contribuciones son bienvenidas! Si tienes ideas para nuevos ejercicios o mejoras para los existentes, no dudes en abrir un issue o abrir un pull request.
-
-

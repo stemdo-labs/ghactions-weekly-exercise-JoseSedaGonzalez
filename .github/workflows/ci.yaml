@@ -1,0 +1,51 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: labs-runner
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build Angular project
+        run: npm run build
+
+      - name: Run reusable workflow - Build Setup
+        uses: ./.github/workflows/reusable-build.yml
+
+      - name: Get Docker image tag
+        id: get_tag
+        uses: ./.github/actions/tag-docker
+
+      - name: Log in to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build Docker image
+        run: docker build -t ${{ steps.get_tag.outputs.tagged_image }} .
+
+      - name: Push Docker image
+        run: docker push ${{ steps.get_tag.outputs.tagged_image }}
+
+  test-coverage:
+    needs: build-and-push
+    runs-on: labs-runner
+    if: env.ENVIRONMENT == 'production'  # SOLO en producción
+    steps:
+      - name: Simulate running tests
+        run: echo "Running production-only tests..." && sleep 10
