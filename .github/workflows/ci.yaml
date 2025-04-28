@@ -24,7 +24,7 @@ jobs:
         run: npm run build
 
       - name: Run reusable workflow - Build Setup
-        uses: ./.github/workflows/reusable-build.yml
+        uses: ./.github/workflows/reusable-build.yaml
 
       - name: Get Docker image tag
         id: get_tag
