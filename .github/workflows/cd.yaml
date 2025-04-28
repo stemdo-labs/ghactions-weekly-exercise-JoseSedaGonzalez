@@ -1,0 +1,20 @@
+name: Continuous Deployment
+
+on:
+  workflow_dispatch:  # Para lanzarlo manualmente
+
+jobs:
+  deploy:
+    runs-on: labs-runner
+
+    steps:
+      - name: Pull Docker image
+        run: docker pull ${{ secrets.DOCKERHUB_USERNAME }}/ghactions-weekly-exercise:latest
+
+      - name: Run container
+        run: |
+          docker run -d -p 80:80 --name my-angular-app ${{ secrets.DOCKERHUB_USERNAME }}/ghactions-weekly-exercise:latest
+          sleep 10
+
+      - name: Check with curl
+        run: curl -f http://localhost || (echo "Service not responding!" && exit 1)
