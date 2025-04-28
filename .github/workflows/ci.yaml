@@ -48,4 +48,4 @@ jobs:
     if: secrets.ENVIRONMENT == 'production'  # SOLO en producción
     steps:
       - name: Simulate running tests
-        run: echo "Running production-only tests..." && sleep 10
+        run: echo "Running production-only tests...." && sleep 10
