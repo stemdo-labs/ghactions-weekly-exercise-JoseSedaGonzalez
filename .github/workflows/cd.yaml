@@ -5,7 +5,7 @@ on:
 
 jobs:
   deploy:
-    runs-on: labs-runner
+    runs-on: ubuntu-latest
 
     steps:
       - name: Pull Docker image
