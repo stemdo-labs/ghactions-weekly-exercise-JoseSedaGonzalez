@@ -7,7 +7,7 @@ on:
 
 jobs:
   build-and-push:
-    runs-on: labs-runner
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
@@ -44,7 +44,7 @@ jobs:
 
   test-coverage:
     needs: build-and-push
-    runs-on: labs-runner
+    runs-on: ubuntu-latest
     env:
       ENVIRONMENT: ${{ secrets.ENVIRONMENT }}  # Pasa el secreto como variable de entorno
     steps:

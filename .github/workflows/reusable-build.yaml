@@ -5,7 +5,7 @@ on:
 
 jobs:
   setup-build:
-    runs-on: labs-runner
+    runs-on: ubuntu-latest
     steps:
       - name: Setup Node.js
         uses: actions/setup-node@v4
