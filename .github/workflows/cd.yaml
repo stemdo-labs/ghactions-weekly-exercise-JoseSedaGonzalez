@@ -26,5 +26,3 @@ jobs:
         run: |
           docker run -d -p 8080:8080 ${{ vars.DOCKER_USERNAME }}/mi-app-angular:$VERSION
           curl -f http://localhost:8080 || exit 1
-
-

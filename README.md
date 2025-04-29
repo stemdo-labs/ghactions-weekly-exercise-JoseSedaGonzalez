@@ -75,3 +75,114 @@ El campo "version" del archivo package.json es el que se usará para etiquetar l
 ## Contribución
 
 ¡Tus contribuciones son bienvenidas! Si tienes ideas para nuevos ejercicios o mejoras para los existentes, no dudes en abrir un issue o abrir un pull request.
+
+# Solución
+## Que hacen cada uno de los workflows
+### CI - Build and Docker Push `ci.yaml`
+Este flujo de trabajo se activa automáticamente cuando se hace push a la rama main. Sus pasos son:
+
+1. Clona el repositorio.
+2. Configura Node.js versión 18.
+3. Instala dependencias con npm install.
+4. Ejecuta tests .
+5. Compila la app Angular en modo producción (npm run build --prod).
+6. Obtiene la versión de la app desde package.json y la guarda como output.
+7. Construye la imagen Docker con etiqueta: DOCKER_USERNAME/mi-app-angular:<versión>.
+8. Publica la imagen en Docker Hub, usando credenciales almacenadas como vars.
+
+Este workflow no despliega, solo construye y sube la imagen a Docker Hub.<br>
+
+````yml
+name: CI - Build and Docker Push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.set-version.outputs.version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run tests
+        run: echo 'npm test'
+
+      - name: Build Angular application
+        run: npm run build --prod
+
+      - name: Set version output
+        id: set-version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Build Docker image
+        run: |
+          docker build -t ${{ vars.DOCKER_USERNAME }}/mi-app-angular:${{ steps.set-version.outputs.version }} .
+
+      - name: Push Docker image
+        run: |
+          echo "${{ vars.DOCKER_PASSWORD }}" | docker login -u ${{ vars.DOCKER_USERNAME }} --password-stdin
+          docker push ${{ vars.DOCKER_USERNAME }}/mi-app-angular:${{ steps.set-version.outputs.version }}
+````
+<br><img src="datos/ci.png"><br>
+
+### CD - Deploy Docker Image `cd.yaml`
+
+Este segundo flujo se activa automáticamente después de que el workflow CI haya terminado correctamente, gracias a workflow_run.
+
+1. Clona el repositorio.
+2. Obtiene la versión de la app leyendo package.json.
+3. Descarga la imagen desde Docker Hub: DOCKER_USERNAME/mi-app-angular:<versión>.
+4. Ejecuta un contenedor en segundo plano con Nginx en el puerto 8080, sirviendo la app compilada.
+5. Hace una petición curl al contenedor para verificar que responde correctamente.
+
+Este flujo representa la fase de despliegue (CD).<br>
+
+````yml
+name: CD - Deploy Docker Image
+
+on:
+  workflow_run:
+    workflows: ["CI - Build and Docker Push"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Get package version
+        id: version
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_ENV
+
+      - name: Pull Docker image
+        run: |
+          docker pull ${{ vars.DOCKER_USERNAME }}/mi-app-angular:$VERSION
+
+      - name: Deploy to Nginx
+        run: |
+          docker run -d -p 8080:8080 ${{ vars.DOCKER_USERNAME }}/mi-app-angular:$VERSION
+          curl -f http://localhost:8080 || exit 1
+````
+<br><img src="datos/cd.png"><br>
+
+### Usuario y contraseña de Docker
+
+- Se utilizan variables (`vars`) del repositorio llamadas `DOCKER_USERNAME` y `DOCKER_PASSWORD`. Que tenemos que definirlas en Settings -> Secrets and variables -> Actions -> Variables -> New repository variable
+- Estas se utilizan para el login a Docker Hub (en CI) y para referenciar la imagen en CD.
