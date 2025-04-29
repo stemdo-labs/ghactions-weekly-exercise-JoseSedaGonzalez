@@ -4,7 +4,6 @@ on:
   repository_dispatch:
     types: [trigger-cd]
 
-
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -15,9 +14,9 @@ jobs:
       - name: Pull Docker image
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          docker pull ${{ vars.DOCKER_USERNAME }}mi-app-angular:$VERSION
+          docker pull ${{ vars.DOCKER_USERNAME }}/mi-app-angular:$VERSION
 
       - name: Deploy to Nginx
         run: |
-          docker run -d -p 80:80 ${{ vars.DOCKER_USERNAME }}mi-app-angular:$VERSION
+          docker run -d -p 80:80 ${{ vars.DOCKER_USERNAME }}/mi-app-angular:$VERSION
           curl -f http://localhost:80 || exit 1
