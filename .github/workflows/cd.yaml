@@ -1,7 +1,9 @@
 name: CD - Deploy Docker Image
 
 on:
-  workflow_dispatch:
+  repository_dispatch:
+    types: [trigger-cd]
+
 
 jobs:
   deploy:
