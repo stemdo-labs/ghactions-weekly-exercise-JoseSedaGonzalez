@@ -33,7 +33,7 @@ jobs:
 
       - name: Push Docker image
         run: |
-          docker login -u ${{ vars.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ vars.DOCKER_USERNAME }} --password-stdin
           VERSION=$(node -p "require('./package.json').version")
           docker push ${{ vars.DOCKER_USERNAME }}/mi-app-angular:$VERSION
 
@@ -47,6 +47,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: ${{ github.repository }}
           event-type: trigger-cd
+
 
 
 
