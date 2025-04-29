@@ -26,15 +26,17 @@ jobs:
       - name: Build Angular application
         run: npm run build --prod
 
-      - name: Build Docker image
+      - name: Build and Tag Docker image
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          docker build -t ${{ vars.DOCKER_USERNAME }}mi-app-angular:$VERSION .
+          IMAGE_NAME="${{ vars.DOCKER_USERNAME }}/mi-app-angular:$VERSION"
+          docker build -t $IMAGE_NAME .
+          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
 
       - name: Push Docker image
         run: |
-          docker login -u ${{ vars.DOCKER_USERNAME }} -p ${{ vars.DOCKER_PASSWORD }}
-          docker push ${{ vars.DOCKER_USERNAME }}mi-app-angular:$VERSION
+          echo "${{ vars.DOCKER_PASSWORD }}" | docker login -u "${{ vars.DOCKER_USERNAME }}" --password-stdin
+          docker push $IMAGE_NAME
 
   post-deploy:
     needs: build
@@ -45,4 +47,5 @@ jobs:
         with:
           workflow: cd.yml
           ref: refs/heads/main
+
 
