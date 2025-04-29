@@ -26,28 +26,28 @@ jobs:
       - name: Build Angular application
         run: npm run build --prod
 
-      - name: Build and Tag Docker image
+      - name: Build Docker image
         run: |
           VERSION=$(node -p "require('./package.json').version")
-          IMAGE_NAME="${{ vars.DOCKER_USERNAME }}/mi-app-angular:$VERSION"
-          docker build -t $IMAGE_NAME .
-          echo "IMAGE_NAME=$IMAGE_NAME" >> $GITHUB_ENV
+          docker build -t ${{ vars.DOCKER_USERNAME }}/mi-app-angular:$VERSION .
 
       - name: Push Docker image
         run: |
-          echo "${{ vars.DOCKER_PASSWORD }}" | docker login -u "${{ vars.DOCKER_USERNAME }}" --password-stdin
-          docker push $IMAGE_NAME
+          docker login -u ${{ vars.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+          VERSION=$(node -p "require('./package.json').version")
+          docker push ${{ vars.DOCKER_USERNAME }}/mi-app-angular:$VERSION
 
   post-deploy:
-  needs: build
-  runs-on: ubuntu-latest
-  steps:
-    - name: Trigger CD workflow
-      uses: peter-evans/repository-dispatch@v2
-      with:
-        token: ${{ secrets.GITHUB_TOKEN }}
-        repository: ${{ github.repository }}
-        event-type: trigger-cd
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger CD workflow
+        uses: peter-evans/repository-dispatch@v2
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          repository: ${{ github.repository }}
+          event-type: trigger-cd
+
 
 
 
