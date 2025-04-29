@@ -33,7 +33,7 @@ jobs:
 
       - name: Push Docker image
         run: |
-          echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u ${{ vars.DOCKER_USERNAME }} --password-stdin
+          echo "${{ vars.DOCKER_PASSWORD }}" | docker login -u ${{ vars.DOCKER_USERNAME }} --password-stdin
           VERSION=$(node -p "require('./package.json').version")
           docker push ${{ vars.DOCKER_USERNAME }}/mi-app-angular:$VERSION
 
